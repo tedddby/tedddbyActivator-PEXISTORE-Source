@@ -117,7 +117,7 @@ const ConfirmTransaction = async (session) => {
             }, envData.JWT_Private_Key, {expiresIn: 15 * 60 * 1000});
 
             if(paymentIntent.amount_received/100 == price){
-                const lowered = decoded.Service.split(" ")[0].toLowerCase();
+                const lowered = decoded.Service.split(" ")[0].toLowerCase(); //fmi
                 const url = "https://api.v2.tedddby.com/"+lowered+"/register";
 
                 let hitServer = "500";
@@ -171,7 +171,7 @@ const ConfirmTransactionReseller = async (session) => {
     }
 }
 
-app.post("/stripe/webhook", bodyParser.raw({type: 'application/json'}), webhook);
+app.post("/webhook", bodyParser.raw({type: 'application/json'}), webhook);
 
 app.get("/", (req, res) => {
     res.render("index.hbs");
