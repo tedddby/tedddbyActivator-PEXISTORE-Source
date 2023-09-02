@@ -20,6 +20,7 @@ const promisify = f => (...args) => new Promise((a,b)=>f(...args, (err, res) => 
 
 const webhook = async (req, res) =>
 {
+
     const payload = req.body;
     const sig = req.headers['stripe-signature'];
   
@@ -108,15 +109,27 @@ const ConfirmTransaction = async (session) => {
         try{
             const decoded = await promisify(jwt.verify)(token, envData.JWT_Private_Key);
             const price = decoded.Price;
+            var accessToken;
 
-            const accessToken = jwt.sign({
-                SerialNumber:decoded.SerialNumber,
-                Service:decoded.Service,
-                Email:session.customer_details.email,
-                Amount:paymentIntent.amount_received/100
-            }, envData.JWT_Private_Key, {expiresIn: 15 * 60 * 1000});
+            if(decoded.SoldBy){
+                accessToken = jwt.sign({
+                    SerialNumber:decoded.SerialNumber,
+                    Service:decoded.Service,
+                    Email:session.customer_details.email,
+                    Amount:paymentIntent.amount_received/100,
+                    SoldBy:decoded.SoldBy
+                }, envData.JWT_Private_Key, {expiresIn: 15 * 60 * 1000});
+            }else{
+                accessToken = jwt.sign({
+                    SerialNumber:decoded.SerialNumber,
+                    Service:decoded.Service,
+                    Email:session.customer_details.email,
+                    Amount:paymentIntent.amount_received/100
+                }, envData.JWT_Private_Key, {expiresIn: 15 * 60 * 1000});
+            }
 
             if(paymentIntent.amount_received/100 == price){
+                /**/ console.log("price ok")
                 const lowered = decoded.Service.split(" ")[0].toLowerCase(); //fmi
                 const url = "https://api.v2.tedddby.com/"+lowered+"/register";
 
